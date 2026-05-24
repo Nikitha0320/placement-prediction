@@ -1,12 +1,13 @@
 import pandas as pd
 import os
+import logging
 
 
-# ---------------- Load Dataset ----------------
-
+# ---------------- Load Dataset (lazy, robust) ----------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-dataset_path = os.path.join(
+# Allow overriding dataset path via env var (useful for deployments)
+DEFAULT_DATASET_PATH = os.path.join(
     BASE_DIR,
     '..',
     '..',
@@ -14,13 +15,42 @@ dataset_path = os.path.join(
     'balanced_placement_dataset.csv'
 )
 
-df = pd.read_csv(dataset_path)
+DATASET_PATH = os.getenv('DATASET_PATH', DEFAULT_DATASET_PATH)
+
+_df = None
+
+
+def load_dataset():
+    global _df
+    if _df is not None:
+        return _df
+
+    try:
+        _df = pd.read_csv(DATASET_PATH)
+        return _df
+    except FileNotFoundError:
+        logging.warning(f"Dataset not found at {DATASET_PATH}. Using fallback sample data.")
+        # Create a minimal fallback dataset so endpoints still work
+        _df = pd.DataFrame([
+            {
+                'gender': 'Female',
+                'branch': 'CSE',
+                'placement_status': 'Placed'
+            },
+            {
+                'gender': 'Male',
+                'branch': 'ECE',
+                'placement_status': 'Not Placed'
+            }
+        ])
+        return _df
 
 
 # ---------------- Gender Bias ----------------
 
 def gender_bias_analysis():
 
+    df = load_dataset()
     gender_bias = (
         df.groupby('gender')['placement_status']
         .apply(lambda x: (x == 'Placed').mean() * 100)
@@ -65,6 +95,7 @@ def gender_bias_analysis():
 
 def branch_bias_analysis():
 
+    df = load_dataset()
     branch_bias = (
         df.groupby('branch')
         ['placement_status']

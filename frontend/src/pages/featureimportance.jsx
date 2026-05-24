@@ -1,5 +1,5 @@
 import React from 'react';
-import Charts from '../components/Charts';
+import Charts from '../components/charts';
 import { BarChart3, HelpCircle } from 'lucide-react';
 
 const data = [

@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 
 const defaultForm = {
-  age: 22,
+  age: '',
   cgpa: '',
   internships_count: '',
   projects_count: '',
@@ -23,7 +23,7 @@ const defaultForm = {
   backlogs: '',
   attendance_percentage: '',
   gender: 'Female',
-  branch: 'ECE'
+  branch: 'CSE'
 };
 
 function PlacementPrediction() {

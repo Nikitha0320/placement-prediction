@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+import os
+from dotenv import load_dotenv
 
 from routes.placement_predict import predict_placement
 from routes.risk_scoring import get_risk_prediction
@@ -10,9 +12,16 @@ from routes.skill_gap import predict_skill_gap
 app = FastAPI( title="Placement Prediction API",
     description="Student Placement Prediction System")
 
+# Load environment variables (local development .env)
+load_dotenv()
+
+# Configure allowed origins via ALLOWED_ORIGINS env var (comma-separated)
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173")
+allow_origins = [o.strip() for o in ALLOWED_ORIGINS.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],   # Change later for security
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
